@@ -1,35 +1,65 @@
 "use client"
 
-import type React from "react"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { readingLogSchema, type ReadingLogFormData } from "@/lib/validations/reading-log"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { BookOpen, Clock } from "lucide-react"
-import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 export default function ReadingLogForm() {
-  const [bookTitle, setBookTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [minutes, setMinutes] = useState("")
-  const [group, setGroup] = useState("")
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<ReadingLogFormData>({
+    resolver: zodResolver(readingLogSchema),
+    defaultValues: {
+      bookTitle: "",
+      description: "",
+      minutes: 0,
+      group: "",
+    }
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would handle the form submission, e.g., send to an API
-    console.log({ bookTitle, description, minutes, group })
+  const onSubmit = async (data: ReadingLogFormData) => {
+    try {
+      console.log('Submitting form data:', data)
+      
+      const response = await fetch("/api/reading-logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
 
-    // Reset form
-    setBookTitle("")
-    setDescription("")
-    setMinutes("")
-    setGroup("")
+      const responseData = await response.json()
+      console.log('API Response:', responseData)
 
-    // Show success message
-    alert("Reading session logged successfully!")
+      if (!response.ok) {
+        const errorMessage = responseData.error || "Failed to log reading session"
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorMessage
+        })
+        throw new Error(errorMessage)
+      }
+
+      reset()
+      toast.success("Reading session logged successfully!")
+    } catch (error) {
+      console.error('Form submission error:', error)
+      toast.error(error instanceof Error ? error.message : "Failed to log reading session. Please try again.")
+    }
   }
 
   return (
@@ -38,50 +68,64 @@ export default function ReadingLogForm() {
         <CardTitle>Log Reading Session</CardTitle>
         <CardDescription>Record your reading progress to compete with your groups.</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="book-title">Book Title</Label>
+            <Label htmlFor="bookTitle">Book Title</Label>
             <div className="flex items-center space-x-2">
               <BookOpen className="w-4 h-4 text-muted-foreground" />
               <Input
-                id="book-title"
+                id="bookTitle"
                 placeholder="Enter the title of the book"
-                value={bookTitle}
-                onChange={(e) => setBookTitle(e.target.value)}
-                required
+                {...register("bookTitle")}
               />
             </div>
+            {errors.bookTitle && (
+              <p className="text-sm text-red-500">{errors.bookTitle.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reading-time">Reading Time (minutes)</Label>
+            <Label htmlFor="minutes">Reading Time (minutes)</Label>
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4 text-muted-foreground" />
               <Input
-                id="reading-time"
+                id="minutes"
                 type="number"
                 placeholder="How long did you read?"
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
-                required
+                {...register("minutes", { valueAsNumber: true })}
               />
             </div>
+            {errors.minutes && (
+              <p className="text-sm text-red-500">{errors.minutes.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="group">Group</Label>
-            <Select value={group} onValueChange={setGroup}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a group" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="book-enthusiasts">Book Enthusiasts</SelectItem>
-                <SelectItem value="sci-fi-lovers">Sci-Fi Lovers</SelectItem>
-                <SelectItem value="mystery-readers">Mystery Readers</SelectItem>
-                <SelectItem value="personal">Personal (No Group)</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="group"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="book-enthusiasts">Book Enthusiasts</SelectItem>
+                    <SelectItem value="sci-fi-lovers">Sci-Fi Lovers</SelectItem>
+                    <SelectItem value="mystery-readers">Mystery Readers</SelectItem>
+                    <SelectItem value="personal">Personal (No Group)</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.group && (
+              <p className="text-sm text-red-500">{errors.group.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -89,13 +133,14 @@ export default function ReadingLogForm() {
             <Textarea
               id="description"
               placeholder="Share your thoughts or what you learned..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description")}
             />
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit">Log Reading Session</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Logging..." : "Log Reading Session"}
+          </Button>
         </CardFooter>
       </form>
     </Card>
