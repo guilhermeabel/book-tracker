@@ -1,5 +1,6 @@
-import { supabase } from '@/lib/supabase'
 import { readingLogSchema } from '@/lib/validations/reading-log'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 // Add this to ensure the route is properly configured
@@ -10,12 +11,15 @@ export async function POST(request: Request) {
   console.log('API route hit')
   
   try {
-    // Check environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.error('Missing Supabase environment variables')
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Get the current user
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
       return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       )
     }
 
@@ -53,6 +57,7 @@ export async function POST(request: Request) {
         minutes: validatedData.minutes,
         group: validatedData.group,
         created_at: new Date().toISOString(),
+        user_id: session.user.id,
       })
       .select()
       .single()
