@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 // Mock data for the charts
 const weeklyData = [
@@ -22,27 +22,27 @@ const monthlyData = [
   { name: "Week 4", hours: 14 },
 ]
 
-const bookData = [
-  { name: "The Great Gatsby", hours: 8 },
-  { name: "To Kill a Mockingbird", hours: 12 },
-  { name: "1984", hours: 10 },
-  { name: "Pride and Prejudice", hours: 14 },
-  { name: "The Hobbit", hours: 18 },
+const subjectData = [
+  { name: "Mathematics", hours: 8 },
+  { name: "Physics", hours: 12 },
+  { name: "Chemistry", hours: 10 },
+  { name: "Biology", hours: 14 },
+  { name: "History", hours: 18 },
 ]
 
-export default function ReadingStats() {
+export default function StudyStats() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reading Statistics</CardTitle>
-        <CardDescription>Track your reading habits over time.</CardDescription>
+        <CardTitle>Study Statistics</CardTitle>
+        <CardDescription>Track your study habits over time.</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="weekly" className="space-y-4">
           <TabsList>
             <TabsTrigger value="weekly">Weekly</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="books">By Book</TabsTrigger>
+            <TabsTrigger value="subjects">By Subject</TabsTrigger>
           </TabsList>
 
           <TabsContent value="weekly">
@@ -52,12 +52,12 @@ export default function ReadingStats() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis label={{ value: "Hours", angle: -90, position: "insideLeft" }} />
-                  <Tooltip formatter={(value) => [`${value} hours`, "Reading Time"]} />
+                  <Tooltip formatter={(value) => [`${value} hours`, "Study Time"]} />
                   <Bar dataKey="hours" fill="#6366f1" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-sm text-muted-foreground mt-4 text-center">You read the most on Saturday (3 hours)</p>
+            <p className="text-sm text-muted-foreground mt-4 text-center">You studied the most on Saturday (3 hours)</p>
           </TabsContent>
 
           <TabsContent value="monthly">
@@ -67,30 +67,30 @@ export default function ReadingStats() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis label={{ value: "Hours", angle: -90, position: "insideLeft" }} />
-                  <Tooltip formatter={(value) => [`${value} hours`, "Reading Time"]} />
+                  <Tooltip formatter={(value) => [`${value} hours`, "Study Time"]} />
                   <Bar dataKey="hours" fill="#6366f1" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <p className="text-sm text-muted-foreground mt-4 text-center">
-              You read 44 hours this month, averaging 11 hours per week
+              You studied 44 hours this month, averaging 11 hours per week
             </p>
           </TabsContent>
 
-          <TabsContent value="books">
+          <TabsContent value="subjects">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={bookData} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
+                <BarChart data={subjectData} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" label={{ value: "Hours", position: "insideBottom", offset: -5 }} />
                   <YAxis type="category" dataKey="name" width={100} />
-                  <Tooltip formatter={(value) => [`${value} hours`, "Reading Time"]} />
+                  <Tooltip formatter={(value) => [`${value} hours`, "Study Time"]} />
                   <Bar dataKey="hours" fill="#6366f1" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <p className="text-sm text-muted-foreground mt-4 text-center">
-              You spent the most time reading "The Hobbit" (18 hours)
+              You spent the most time studying History (18 hours)
             </p>
           </TabsContent>
         </Tabs>

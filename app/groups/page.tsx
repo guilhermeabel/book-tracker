@@ -1,19 +1,19 @@
-import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BookOpen, Users, Plus } from "lucide-react"
+import { BookOpen, Plus, Users } from "lucide-react"
+import Link from "next/link"
 
 // Mock data for groups
 const groupsData = [
   {
-    id: "book-enthusiasts",
-    name: "Book Enthusiasts",
-    description: "A group for people who love reading all kinds of books.",
+    id: "study-group-1",
+    name: "Study Group 1",
+    description: "A group for students who are serious about their studies.",
     members: 24,
-    books: 156,
-    readingHours: 1240,
+    subjects: 156,
+    studyHours: 1240,
     rank: 3,
     topMembers: [
       { name: "Alex J", avatar: "/placeholder.svg?height=32&width=32" },
@@ -22,12 +22,12 @@ const groupsData = [
     ],
   },
   {
-    id: "sci-fi-lovers",
-    name: "Sci-Fi Lovers",
-    description: "For fans of science fiction literature and exploring new worlds.",
+    id: "study-group-2",
+    name: "Study Group 2",
+    description: "For students focused on science and mathematics.",
     members: 18,
-    books: 94,
-    readingHours: 876,
+    subjects: 94,
+    studyHours: 876,
     rank: 5,
     topMembers: [
       { name: "Taylor B", avatar: "/placeholder.svg?height=32&width=32" },
@@ -36,12 +36,12 @@ const groupsData = [
     ],
   },
   {
-    id: "mystery-readers",
-    name: "Mystery Readers",
-    description: "Dedicated to solving literary mysteries one page at a time.",
+    id: "study-group-3",
+    name: "Study Group 3",
+    description: "Dedicated to humanities and social sciences.",
     members: 12,
-    books: 78,
-    readingHours: 654,
+    subjects: 78,
+    studyHours: 654,
     rank: 2,
     topMembers: [
       { name: "Casey W", avatar: "/placeholder.svg?height=32&width=32" },
@@ -56,55 +56,47 @@ export default function GroupsPage() {
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Reading Groups</h1>
-          <p className="text-muted-foreground">Join groups to compete and stay motivated.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Study Groups</h1>
+          <p className="text-muted-foreground">Join a group to study together and track your progress.</p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild>
-            <Link href="/groups/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Group
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/groups/join">
-              <Users className="mr-2 h-4 w-4" />
-              Join Group
-            </Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link href="/groups/create">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Group
+          </Link>
+        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {groupsData.map((group) => (
-          <Card key={group.id} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
+          <Card key={group.id}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <CardTitle>{group.name}</CardTitle>
-                <Badge variant="outline" className="ml-2">
-                  Rank #{group.rank}
-                </Badge>
+                <Badge variant="outline">#{group.rank}</Badge>
               </div>
               <CardDescription>{group.description}</CardDescription>
             </CardHeader>
-            <CardContent className="pb-2">
-              <div className="flex justify-between mb-4">
-                <div className="text-center">
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-2 bg-muted rounded-lg">
+                  <Users className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                   <p className="text-sm font-medium">{group.members}</p>
                   <p className="text-xs text-muted-foreground">Members</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium">{group.books}</p>
-                  <p className="text-xs text-muted-foreground">Books</p>
+                <div className="text-center p-2 bg-muted rounded-lg">
+                  <BookOpen className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                  <p className="text-sm font-medium">{group.subjects}</p>
+                  <p className="text-xs text-muted-foreground">Subjects</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium">{group.readingHours}</p>
+                <div className="text-center p-2 bg-muted rounded-lg">
+                  <p className="text-sm font-medium">{group.studyHours}</p>
                   <p className="text-xs text-muted-foreground">Hours</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-medium mb-2">Top Readers</p>
+                <p className="text-sm font-medium mb-2">Top Students</p>
                 <div className="flex -space-x-2">
                   {group.topMembers.map((member, index) => (
                     <Avatar

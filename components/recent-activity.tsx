@@ -7,45 +7,45 @@ const activityData = [
   {
     id: 1,
     user: { name: "Alex Johnson", avatar: "/placeholder.svg?height=40&width=40" },
-    action: "finished reading",
-    book: "The Great Gatsby",
+    action: "finished studying",
+    subject: "Mathematics",
     time: "2 hours ago",
-    group: "Book Enthusiasts",
+    group: "Study Group 1",
     minutes: 45,
   },
   {
     id: 2,
     user: { name: "You", avatar: "/placeholder.svg?height=40&width=40" },
     action: "logged a session for",
-    book: "To Kill a Mockingbird",
+    subject: "Physics",
     time: "5 hours ago",
-    group: "Book Enthusiasts",
+    group: "Study Group 1",
     minutes: 60,
     isCurrentUser: true,
   },
   {
     id: 3,
     user: { name: "Jamie Smith", avatar: "/placeholder.svg?height=40&width=40" },
-    action: "started reading",
-    book: "1984",
+    action: "started studying",
+    subject: "Chemistry",
     time: "Yesterday",
-    group: "Book Enthusiasts",
+    group: "Study Group 1",
     minutes: 30,
   },
   {
     id: 4,
     user: { name: "Taylor Brown", avatar: "/placeholder.svg?height=40&width=40" },
     action: "joined group",
-    group: "Book Enthusiasts",
+    group: "Study Group 1",
     time: "2 days ago",
   },
   {
     id: 5,
     user: { name: "Morgan Lee", avatar: "/placeholder.svg?height=40&width=40" },
     action: "logged a session for",
-    book: "Pride and Prejudice",
+    subject: "Biology",
     time: "2 days ago",
-    group: "Book Enthusiasts",
+    group: "Study Group 1",
     minutes: 75,
   },
 ]
@@ -55,7 +55,7 @@ export default function RecentActivity() {
     <Card>
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
-        <CardDescription>See what's happening in your reading groups.</CardDescription>
+        <CardDescription>See what's happening in your study groups.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -73,7 +73,7 @@ export default function RecentActivity() {
               <div className="space-y-1">
                 <p className="text-sm">
                   <span className="font-medium">{activity.user.name}</span> {activity.action}{" "}
-                  {activity.book && <span className="font-medium">"{activity.book}"</span>}{" "}
+                  {activity.subject && <span className="font-medium">"{activity.subject}"</span>}{" "}
                   {activity.action === "joined group" && <span className="font-medium">{activity.group}</span>}
                 </p>
                 <div className="flex items-center text-xs text-muted-foreground gap-3">

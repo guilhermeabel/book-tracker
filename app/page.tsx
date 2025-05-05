@@ -1,12 +1,12 @@
-import Link from "next/link"
+import GroupLeaderboard from "@/components/group-leaderboard"
+import RecentActivity from "@/components/recent-activity"
+import StudyLogForm from "@/components/study-log-form"
+import StudyStats from "@/components/study-stats"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Users, Trophy, Clock, TrendingUp } from "lucide-react"
-import ReadingLogForm from "@/components/reading-log-form"
-import GroupLeaderboard from "@/components/group-leaderboard"
-import RecentActivity from "@/components/recent-activity"
-import ReadingStats from "@/components/reading-stats"
+import { BookOpen, Clock, TrendingUp, Trophy, Users } from "lucide-react"
+import Link from "next/link"
 
 export default function Dashboard() {
   return (
@@ -14,7 +14,7 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Track your reading progress and compete with friends.</p>
+          <p className="text-muted-foreground">Track your study progress and compete with friends.</p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -35,7 +35,7 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reading Time</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Study Time</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -45,7 +45,7 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Books Read</CardTitle>
+            <CardTitle className="text-sm font-medium">Subjects Studied</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -60,12 +60,12 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">#3</div>
-            <p className="text-xs text-muted-foreground">In "Book Enthusiasts"</p>
+            <p className="text-xs text-muted-foreground">In "Study Group 1"</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reading Streak</CardTitle>
+            <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -77,16 +77,16 @@ export default function Dashboard() {
 
       <Tabs defaultValue="log" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="log">Log Reading</TabsTrigger>
+          <TabsTrigger value="log">Log Study</TabsTrigger>
           <TabsTrigger value="stats">My Stats</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
         </TabsList>
         <TabsContent value="log" className="space-y-4">
-          <ReadingLogForm />
+          <StudyLogForm />
         </TabsContent>
         <TabsContent value="stats" className="space-y-4">
-          <ReadingStats />
+          <StudyStats />
         </TabsContent>
         <TabsContent value="leaderboard" className="space-y-4">
           <GroupLeaderboard />
