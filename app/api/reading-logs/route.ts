@@ -8,8 +8,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function POST(request: Request) {
-  console.log('API route hit')
-  
+ 
   try {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
@@ -24,30 +23,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    console.log('Request body:', body)
-    
     const validatedData = studyLogSchema.parse(body)
-    console.log('Validated data:', validatedData)
-
-    // Log Supabase configuration
-    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-    console.log('Supabase table check...')
-
-    // First, check if the table exists
-    const { data: tableCheck, error: tableError } = await supabase
-      .from('study_logs')
-      .select('id')
-      .limit(1)
-
-    if (tableError) {
-      console.error('Table check error:', tableError)
-      return NextResponse.json(
-        { error: 'Database table error', details: tableError.message },
-        { status: 500 }
-      )
-    }
-
-    console.log('Table exists, proceeding with insert...')
 
     const { data, error } = await supabase
       .from('study_logs')
@@ -62,7 +38,6 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    console.log('Supabase response:', { data, error })
 
     if (error) {
       console.error('Database error:', error)

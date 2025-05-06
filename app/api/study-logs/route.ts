@@ -8,15 +8,14 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function POST(request: Request) {
-  console.log('API route hit')
-  
   try {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
     // Get the current user
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -24,63 +23,97 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    console.log('Request body:', body)
     
+    // Validate the request body
     const validatedData = studyLogSchema.parse(body)
-    console.log('Validated data:', validatedData)
 
-    // Log Supabase configuration
-    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-    console.log('Supabase table check...')
-
-    // First, check if the table exists
-    const { data: tableCheck, error: tableError } = await supabase
-      .from('study_logs')
-      .select('id')
-      .limit(1)
-
-    if (tableError) {
-      console.error('Table check error:', tableError)
-      return NextResponse.json(
-        { error: 'Database table error', details: tableError.message },
-        { status: 500 }
-      )
-    }
-
-    console.log('Table exists, proceeding with insert...')
-
+    // Insert the study log
     const { data, error } = await supabase
       .from('study_logs')
       .insert({
+        user_id: session.user.id,
         subject: validatedData.subject,
         description: validatedData.description,
         minutes: validatedData.minutes,
-        group: validatedData.group,
-        created_at: new Date().toISOString(),
-        user_id: session.user.id,
+        group_id: validatedData.group || null,
       })
       .select()
       .single()
 
-    console.log('Supabase response:', { data, error })
-
     if (error) {
-      console.error('Database error:', error)
+      console.error('Error creating study log:', error)
       return NextResponse.json(
-        { error: error.message, details: error.details },
+        { error: 'Failed to create study log' },
         { status: 500 }
       )
     }
 
     return NextResponse.json(data, { status: 201 })
   } catch (error) {
-    console.error('Request error:', error)
+    console.error('Error in study log creation:', error)
+    
     if (error instanceof Error) {
       return NextResponse.json(
-        { error: error.message, stack: error.stack },
+        { error: error.message },
         { status: 400 }
       )
     }
+    
+    return NextResponse.json(
+      { error: 'An unexpected error occurred' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Get the current user
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const groupId = searchParams.get('group_id')
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
+    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
+
+    // Build the query
+    let query = supabase
+      .from('study_logs')
+      .select('*, user:users(name, avatar_url)')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+      .range(offset, offset + limit - 1)
+
+    // Add group filter if specified
+    if (groupId) {
+      query = query.eq('group_id', groupId)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Error fetching study logs:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch study logs' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error in study log fetch:', error)
     return NextResponse.json(
       { error: 'An unexpected error occurred' },
       { status: 500 }
