@@ -98,8 +98,6 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
     .select('id, name, avatar_url')
     .in('id', userIds)
 
-	console.log('Profiles:', profiles)	
-  
   if (profilesError) {
     console.error('Error fetching profiles:', profilesError)
     return []

@@ -5,6 +5,16 @@ import { Users } from "lucide-react"
 import { cookies } from "next/headers"
 import Link from "next/link"
 
+interface Group {
+  id: string
+  name: string
+  description: string | null
+  created_at: string
+  group_members: Array<{
+    role: string
+  }>
+}
+
 export default async function GroupsPage() {
   const supabase = createServerComponentClient({ cookies })
   const { data: groups } = await supabase
@@ -65,13 +75,13 @@ export default async function GroupsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {groups?.map((group) => (
-            <Card key={group.id}>
+          {groups?.map((group: Group) => (
+            <Card key={group.id} className="flex flex-col">
               <CardHeader>
                 <CardTitle>{group.name}</CardTitle>
                 <CardDescription>{group.description || "No description provided"}</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1">
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                   <Users className="w-4 h-4" />
                   <span>Member since {new Date(group.created_at).toLocaleDateString()}</span>

@@ -13,7 +13,7 @@ export default async function CreateGroupPage() {
   }
 
   return (
-    <div className="container px-4 max-w-2xl py-8">
+    <div className="container max-w-md mx-auto py-12">
       <Card>
         <CardHeader>
           <CardTitle>Create a Study Group</CardTitle>
