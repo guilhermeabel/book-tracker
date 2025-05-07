@@ -1,36 +1,36 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useStudyStats } from "@/lib/hooks/use-study-stats"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
-// Mock data for the charts
-const weeklyData = [
-  { name: "Mon", hours: 1.5 },
-  { name: "Tue", hours: 2.0 },
-  { name: "Wed", hours: 0.5 },
-  { name: "Thu", hours: 1.0 },
-  { name: "Fri", hours: 2.5 },
-  { name: "Sat", hours: 3.0 },
-  { name: "Sun", hours: 2.0 },
-]
-
-const monthlyData = [
-  { name: "Week 1", hours: 10 },
-  { name: "Week 2", hours: 12 },
-  { name: "Week 3", hours: 8 },
-  { name: "Week 4", hours: 14 },
-]
-
-const subjectData = [
-  { name: "Mathematics", hours: 8 },
-  { name: "Physics", hours: 12 },
-  { name: "Chemistry", hours: 10 },
-  { name: "Biology", hours: 14 },
-  { name: "History", hours: 18 },
-]
-
 export default function StudyStats() {
+  const { data: stats, isLoading } = useStudyStats()
+
+  if (isLoading || !stats) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-72" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[300px] w-full" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const weeklyTotal = stats.weekly.reduce((sum, day) => sum + day.hours, 0)
+  const monthlyTotal = stats.monthly.reduce((sum, week) => sum + week.hours, 0)
+  const weeklyAverage = weeklyTotal / 7
+  const monthlyAverage = monthlyTotal / 4
+
+  const maxWeeklyDay = stats.weekly.reduce((max, day) => day.hours > max.hours ? day : max, stats.weekly[0])
+  const maxMonthlyWeek = stats.monthly.reduce((max, week) => week.hours > max.hours ? week : max, stats.monthly[0])
+
   return (
     <Card>
       <CardHeader>
@@ -42,13 +42,12 @@ export default function StudyStats() {
           <TabsList>
             <TabsTrigger value="weekly">Weekly</TabsTrigger>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="subjects">By Subject</TabsTrigger>
           </TabsList>
 
           <TabsContent value="weekly">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={stats.weekly} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis label={{ value: "Hours", angle: -90, position: "insideLeft" }} />
@@ -57,13 +56,17 @@ export default function StudyStats() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-sm text-muted-foreground mt-4 text-center">You studied the most on Saturday (3 hours)</p>
+            <p className="text-sm text-muted-foreground mt-4 text-center">
+              {maxWeeklyDay.hours > 0
+                ? `You studied the most on ${maxWeeklyDay.name} (${maxWeeklyDay.hours} hours)`
+                : "No study data for this week"}
+            </p>
           </TabsContent>
 
           <TabsContent value="monthly">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={stats.monthly} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis label={{ value: "Hours", angle: -90, position: "insideLeft" }} />
@@ -73,24 +76,9 @@ export default function StudyStats() {
               </ResponsiveContainer>
             </div>
             <p className="text-sm text-muted-foreground mt-4 text-center">
-              You studied 44 hours this month, averaging 11 hours per week
-            </p>
-          </TabsContent>
-
-          <TabsContent value="subjects">
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={subjectData} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" label={{ value: "Hours", position: "insideBottom", offset: -5 }} />
-                  <YAxis type="category" dataKey="name" width={100} />
-                  <Tooltip formatter={(value) => [`${value} hours`, "Study Time"]} />
-                  <Bar dataKey="hours" fill="#6366f1" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="text-sm text-muted-foreground mt-4 text-center">
-              You spent the most time studying History (18 hours)
+              {monthlyTotal > 0
+                ? `You studied ${monthlyTotal.toFixed(1)} hours this month, averaging ${monthlyAverage.toFixed(1)} hours per week`
+                : "No study data for this month"}
             </p>
           </TabsContent>
         </Tabs>

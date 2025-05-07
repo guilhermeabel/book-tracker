@@ -15,11 +15,8 @@ const fetchGroups = async (): Promise<Group[]> => {
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) {
-    console.log('No user found, returning empty groups');
     return []
   }
-  
-  console.log('Fetching memberships for user:', user.id);
   
   // First query - get memberships
   const { data: memberships, error: membershipError } = await supabase
@@ -27,28 +24,22 @@ const fetchGroups = async (): Promise<Group[]> => {
     .select('*') // Select all columns for debugging
     .eq('user_id', user.id)
   
-  console.log('Memberships query result:', { memberships, membershipError });
-  
   if (membershipError) {
     console.error('Error fetching memberships:', membershipError);
     throw membershipError
   }
   
   if (!memberships?.length) {
-    console.log('No memberships found, returning empty groups');
     return []
   }
   
   const groupIds = memberships.map(m => m.group_id)
-  console.log('Group IDs to fetch:', groupIds);
   
   // Second query - get groups
   const { data: groups, error: groupsError } = await supabase
     .from('groups')
     .select('*')
     .in('id', groupIds)
-  
-  console.log('Groups query result:', { groups, groupsError });
   
   if (groupsError) {
     console.error('Error fetching groups:', groupsError);

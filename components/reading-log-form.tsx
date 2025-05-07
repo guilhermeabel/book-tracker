@@ -31,8 +31,6 @@ export default function StudyLogForm() {
 
   const onSubmit = async (data: StudyLogFormData) => {
     try {
-      console.log('Submitting form data:', data)
-      
       const response = await fetch("/api/study-logs", {
         method: "POST",
         headers: {
@@ -42,7 +40,6 @@ export default function StudyLogForm() {
       })
 
       const responseData = await response.json()
-      console.log('API Response:', responseData)
 
       if (!response.ok) {
         const errorMessage = responseData.error || "Failed to log study session"
