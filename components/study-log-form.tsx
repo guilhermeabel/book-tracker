@@ -6,22 +6,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useGroupsStore } from "@/lib/stores/groups-store"
+import { useGroups } from "@/lib/hooks/use-groups"
 import { studyLogSchema, type StudyLogFormData } from "@/lib/validations/study-log"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { BookOpen, Clock, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-export default function StudyLogForm() {
+interface StudyLogFormProps {
+  onSuccess?: () => void;
+  showCard?: boolean;
+}
+
+export default function StudyLogForm({ onSuccess, showCard = true }: StudyLogFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { groups, isLoading: isLoadingGroups, fetchGroups } = useGroupsStore()
-  const supabase = createClientComponentClient()
+  const { data: groups, isLoading } = useGroups()
 
   const {
     register,
@@ -39,14 +42,10 @@ export default function StudyLogForm() {
     }
   })
 
-  useEffect(() => {
-    fetchGroups()
-  }, [fetchGroups])
-
   const onSubmit = async (data: StudyLogFormData) => {
     try {
       setIsSubmitting(true)
-      
+
       const response = await fetch("/api/study-logs", {
         method: "POST",
         headers: {
@@ -64,12 +63,14 @@ export default function StudyLogForm() {
         throw new Error(responseData.error || "Failed to log study session")
       }
 
-      // Reset form and show success message
       reset()
       toast.success("Study session logged successfully!")
-      
-      // Refresh the page to show new data
+
       router.refresh()
+
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Form submission error:', error)
       toast.error(error instanceof Error ? error.message : "Failed to log study session. Please try again.")
@@ -78,7 +79,7 @@ export default function StudyLogForm() {
     }
   }
 
-  if (isLoadingGroups) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -89,7 +90,7 @@ export default function StudyLogForm() {
     )
   }
 
-  if (groups.length === 0) {
+  if (!groups || groups.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -113,92 +114,100 @@ export default function StudyLogForm() {
     )
   }
 
+  const formContent = (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="subject">Subject</Label>
+          <div className="flex items-center space-x-2">
+            <BookOpen className="w-4 h-4 text-muted-foreground" />
+            <Input
+              id="subject"
+              placeholder="Enter the subject you studied"
+              {...register("subject")}
+              disabled={isSubmitting}
+            />
+          </div>
+          {errors.subject && (
+            <p className="text-sm text-red-500">{errors.subject.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="minutes">Study Time (minutes)</Label>
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <Input
+              id="minutes"
+              type="number"
+              placeholder="How long did you study?"
+              {...register("minutes", { valueAsNumber: true })}
+              disabled={isSubmitting}
+            />
+          </div>
+          {errors.minutes && (
+            <p className="text-sm text-red-500">{errors.minutes.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="group">Group</Label>
+          <Controller
+            name="group"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.group && (
+            <p className="text-sm text-red-500">{errors.group.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Notes (Optional)</Label>
+          <Textarea
+            id="description"
+            placeholder="Share what you learned or key takeaways..."
+            {...register("description")}
+            disabled={isSubmitting}
+          />
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? "Logging..." : "Log Study Session"}
+        </Button>
+      </CardFooter>
+    </form>
+  );
+
+  if (!showCard) {
+    return formContent;
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Log Study Session</CardTitle>
         <CardDescription>Record your study progress to compete with your groups.</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
-            <div className="flex items-center space-x-2">
-              <BookOpen className="w-4 h-4 text-muted-foreground" />
-              <Input
-                id="subject"
-                placeholder="Enter the subject you studied"
-                {...register("subject")}
-                disabled={isSubmitting}
-              />
-            </div>
-            {errors.subject && (
-              <p className="text-sm text-red-500">{errors.subject.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="minutes">Study Time (minutes)</Label>
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <Input
-                id="minutes"
-                type="number"
-                placeholder="How long did you study?"
-                {...register("minutes", { valueAsNumber: true })}
-                disabled={isSubmitting}
-              />
-            </div>
-            {errors.minutes && (
-              <p className="text-sm text-red-500">{errors.minutes.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="group">Group</Label>
-            <Controller
-              name="group"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a group" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.group && (
-              <p className="text-sm text-red-500">{errors.group.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Notes (Optional)</Label>
-            <Textarea
-              id="description"
-              placeholder="Share what you learned or key takeaways..."
-              {...register("description")}
-              disabled={isSubmitting}
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Logging..." : "Log Study Session"}
-          </Button>
-        </CardFooter>
-      </form>
+      {formContent}
     </Card>
-  )
+  );
 }

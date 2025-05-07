@@ -1,63 +1,29 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useJoinGroup } from "@/lib/hooks/use-join-group"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { toast } from "sonner"
 
 export default function JoinGroupPage() {
 	const router = useRouter()
-	const [isLoading, setIsLoading] = useState(false)
 	const [groupCode, setGroupCode] = useState("")
-	const supabase = createClientComponentClient()
+	const { mutate: joinGroup, isPending } = useJoinGroup()
 
-	const handleJoinGroup = async () => {
-		if (!groupCode.trim()) {
-			toast.error("Please enter a group code")
-			return
-		}
+	const handleJoinGroup = () => {
+		if (!groupCode.trim()) return
 
-		try {
-			setIsLoading(true)
-
-			// First, get the group ID from the code
-			const { data: group, error: groupError } = await supabase
-				.from('groups')
-				.select('id')
-				.eq('invite_code', groupCode)
-				.single()
-
-			if (groupError) throw groupError
-			if (!group) {
-				toast.error("Invalid group code")
-				return
-			}
-
-			// Then, add the user to the group
-			const { error: joinError } = await supabase
-				.from('group_members')
-				.insert({
-					group_id: group.id,
-					user_id: (await supabase.auth.getUser()).data.user?.id,
-					role: 'member'
-				})
-
-			if (joinError) throw joinError
-
-			toast.success("Successfully joined the group!")
-			router.push('/groups')
-		} catch (error) {
-			console.error('Error joining group:', error)
-			toast.error("Failed to join group. Please try again.")
-		} finally {
-			setIsLoading(false)
-		}
+		joinGroup({
+			groupCode: groupCode.trim(),
+			onSuccess: () => router.push('/')
+		})
 	}
 
 	return (
-		<div className="container px-4 max-w-2xl py-8">
+		<div className="container max-w-md mx-auto py-12">
 			<Card>
 				<CardHeader>
 					<CardTitle>Join a Group</CardTitle>
@@ -72,17 +38,17 @@ export default function JoinGroupPage() {
 								placeholder="Enter the group code"
 								value={groupCode}
 								onChange={(e) => setGroupCode(e.target.value)}
-								disabled={isLoading}
+								disabled={isPending}
 							/>
 						</div>
 					</div>
 				</CardContent>
 				<CardFooter className="flex justify-between">
-					<Button variant="outline" onClick={() => router.back()}>
+					<Button variant="outline" onClick={() => router.back()} disabled={isPending}>
 						Back
 					</Button>
-					<Button onClick={handleJoinGroup} disabled={isLoading}>
-						{isLoading ? "Joining..." : "Join Group"}
+					<Button onClick={handleJoinGroup} disabled={isPending || !groupCode.trim()}>
+						{isPending ? "Joining..." : "Join Group"}
 					</Button>
 				</CardFooter>
 			</Card>

@@ -21,14 +21,21 @@ export default async function GroupsPage() {
     .order('name')
 
   return (
-    <div className="container px-4 max-w-4xl py-8">
+    <div className="container max-w-2xl mx-auto py-12">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Study Groups</h1>
-        <Button asChild>
-          <Link href="/groups/create">
-            Create Group
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/">
+              Back
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/groups/create">
+              Create Group
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {groups?.length === 0 ? (

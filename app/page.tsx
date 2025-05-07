@@ -6,18 +6,20 @@ import StudyLogForm from "@/components/study-log-form"
 import StudyStats from "@/components/study-stats"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Loading } from "@/components/ui/loading"
 import { StatsCardSkeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useGroupsStore } from "@/lib/stores/groups-store"
-import { BookOpen, Clock, TrendingUp, Trophy, Users } from "lucide-react"
+import { useGroups } from "@/lib/hooks/use-groups"
+import { BookOpen, Clock, Plus, TrendingUp, Trophy, Users } from "lucide-react"
 import Link from "next/link"
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 
 export default function Dashboard() {
-  const { groups, isLoading: isLoadingGroups, fetchGroups } = useGroupsStore()
+  const { data: groups, isLoading } = useGroups()
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
-  if (isLoadingGroups) {
+  if (isLoading) {
     return <Loading />
   }
 
@@ -28,7 +30,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-900 via-pink-500 to-blue-900 animate-gradient-x">StudyRats</h1>
           <p className="text-muted-foreground">Track your study progress and compete with friends.</p>
         </div>
-        {groups.length > 0 && (
+        {groups && groups.length > 0 && (
           <div className="flex gap-2">
             <Button asChild variant="outline">
               <Link href="/groups">
@@ -36,12 +38,32 @@ export default function Dashboard() {
                 My Groups
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline">
               <Link href="/groups/join">
                 <Users className="mr-2 h-4 w-4" />
                 Join Group
               </Link>
             </Button>
+            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+              <DrawerTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Study
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[90vh] overflow-y-auto max-w-md mx-auto">
+                <DrawerHeader className="text-left">
+                  <DrawerTitle>Record Study Session</DrawerTitle>
+                  <DrawerDescription>Log your study progress to compete with your groups</DrawerDescription>
+                </DrawerHeader>
+                <div className="px-4 pb-4">
+                  <StudyLogForm
+                    onSuccess={() => setDrawerOpen(false)}
+                    showCard={false}
+                  />
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
         )}
       </div>
@@ -97,16 +119,15 @@ export default function Dashboard() {
         </Suspense>
       </div>
 
-      <Tabs defaultValue="log" className="space-y-4">
+      <Tabs defaultValue="activity" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="log">Log Study</TabsTrigger>
+          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           <TabsTrigger value="stats">My Stats</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
         </TabsList>
-        <TabsContent value="log" className="space-y-4">
+        <TabsContent value="activity" className="space-y-4">
           <Suspense fallback={<Loading />}>
-            <StudyLogForm />
+            <RecentActivity />
           </Suspense>
         </TabsContent>
         <TabsContent value="stats" className="space-y-4">
@@ -117,11 +138,6 @@ export default function Dashboard() {
         <TabsContent value="leaderboard" className="space-y-4">
           <Suspense fallback={<Loading />}>
             <GroupLeaderboard />
-          </Suspense>
-        </TabsContent>
-        <TabsContent value="activity" className="space-y-4">
-          <Suspense fallback={<Loading />}>
-            <RecentActivity />
           </Suspense>
         </TabsContent>
       </Tabs>
