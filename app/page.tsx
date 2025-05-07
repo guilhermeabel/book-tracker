@@ -23,7 +23,7 @@ export default function Dashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="container mx-auto py-6 space-y-8 pt-12">
       {isLoadingGroups ? (
         <HeaderSkeleton />
       ) : (

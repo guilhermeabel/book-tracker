@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -64,34 +63,33 @@ export function CreateGroupForm({ userId }: CreateGroupFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Group Name</Label>
-          <Input
-            id="name"
-            name="name"
-            placeholder="Enter a name for your group"
-            required
-            disabled={isLoading}
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="name">Group Name</Label>
+        <Input
+          id="name"
+          name="name"
+          placeholder="Enter a name for your group"
+          required
+          disabled={isLoading}
+        />
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            placeholder="Describe what your group is about"
-            required
-            disabled={isLoading}
-          />
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button 
-          variant="outline" 
-          type="button" 
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          name="description"
+          placeholder="Describe what your group is about"
+          required
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="flex justify-between">
+        <Button
+          variant="outline"
+          type="button"
           onClick={() => router.back()}
           disabled={isLoading}
         >
@@ -100,7 +98,7 @@ export function CreateGroupForm({ userId }: CreateGroupFormProps) {
         <Button type="submit" disabled={isLoading}>
           {isLoading ? "Creating..." : "Create Group"}
         </Button>
-      </CardFooter>
+      </div>
     </form>
   )
 } 

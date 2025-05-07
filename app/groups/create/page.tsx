@@ -1,6 +1,8 @@
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { ArrowLeft } from "lucide-react"
 import { cookies } from "next/headers"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import { CreateGroupForm } from "./create-group-form"
 
@@ -14,13 +16,19 @@ export default async function CreateGroupPage() {
 
   return (
     <div className="container max-w-md mx-auto py-12">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create a Study Group</CardTitle>
-          <CardDescription>Start a new group to study with others.</CardDescription>
-        </CardHeader>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Create Group</h1>
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/groups">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+
+      <div className="space-y-6">
+        <p className="text-muted-foreground">Start a new group to study with others.</p>
         <CreateGroupForm userId={user.id} />
-      </Card>
+      </div>
     </div>
   )
 } 
