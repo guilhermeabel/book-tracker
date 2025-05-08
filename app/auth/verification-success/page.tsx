@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 
-export default function VerificationSuccessPage() {
+function VerificationSuccessContent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const [countdown, setCountdown] = useState(5)
@@ -178,5 +178,35 @@ export default function VerificationSuccessPage() {
 				</CardFooter>
 			</Card>
 		</div>
+	)
+}
+
+// Create a loading fallback for when Suspense is active
+function VerificationLoadingFallback() {
+	return (
+		<div className="container max-w-md mx-auto py-12">
+			<Card>
+				<CardHeader>
+					<CardTitle>Verifying your email...</CardTitle>
+					<CardDescription>
+						Please wait while we verify your email address
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div className="flex items-center justify-center p-4">
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+					</div>
+				</CardContent>
+			</Card>
+		</div>
+	)
+}
+
+// Main component with Suspense boundary
+export default function VerificationSuccessPage() {
+	return (
+		<Suspense fallback={<VerificationLoadingFallback />}>
+			<VerificationSuccessContent />
+		</Suspense>
 	)
 } 

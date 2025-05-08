@@ -8,17 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { studyLogSchema, type StudyLogFormData } from "@/lib/validations/study-log"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import { BookOpen, Clock } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-export default function StudyLogForm() {
+export default function ReadingLogForm() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const {
     register,
     handleSubmit,
     reset,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<StudyLogFormData>({
     resolver: zodResolver(studyLogSchema),
     defaultValues: {
@@ -31,6 +38,8 @@ export default function StudyLogForm() {
 
   const onSubmit = async (data: StudyLogFormData) => {
     try {
+      setIsSubmitting(true)
+
       const response = await fetch("/api/study-logs", {
         method: "POST",
         headers: {
@@ -53,9 +62,17 @@ export default function StudyLogForm() {
 
       reset()
       toast.success("Study session logged successfully!")
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['study-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['activity'] })
+
+      router.refresh()
     } catch (error) {
       console.error('Form submission error:', error)
       toast.error(error instanceof Error ? error.message : "Failed to log study session. Please try again.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 

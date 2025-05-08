@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useGroups } from "@/lib/hooks/use-groups"
 import { studyLogSchema, type StudyLogFormData } from "@/lib/validations/study-log"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
 import { BookOpen, Clock, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -25,6 +26,7 @@ export default function StudyLogForm({ onSuccess, showCard = true }: StudyLogFor
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: groups, isLoading } = useGroups()
+  const queryClient = useQueryClient()
 
   const {
     register,
@@ -65,6 +67,10 @@ export default function StudyLogForm({ onSuccess, showCard = true }: StudyLogFor
 
       reset()
       toast.success("Study session logged successfully!")
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['study-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['activity'] })
 
       router.refresh()
 
