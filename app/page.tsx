@@ -22,8 +22,20 @@ import { Suspense, useState } from "react"
 export default function Home() {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 
+  // Show loading state while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-12 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <div className="h-8 w-96 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+        </div>
+      </div>
+    )
+  }
+
   // Show landing page for non-authenticated users
-  if (!isAuthLoading && !isAuthenticated) {
+  if (!isAuthenticated) {
     return <LandingPage />
   }
 
@@ -41,7 +53,7 @@ function Dashboard() {
       {isLoadingGroups ? (
         <HeaderSkeleton />
       ) : (
-        <div className="flex flex-col md:flex-row justify-start items-start gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
           <AppHeader />
           {groups && groups.length > 0 && (
             <div className="flex gap-2">
@@ -91,6 +103,35 @@ function Dashboard() {
           </>
         ) : (
           <>
+            {stats && stats.streak > 0 ? (
+              <div className="relative p-[1px] rounded-xl transform rotate-1 animate-float overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 rounded-xl"></div>
+                <div className="relative bg-gray-800/90 backdrop-blur-md rounded-xl p-6 shadow-lg h-full">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium mb-2">Study Streak</h3>
+                    <TrendingUp className="h-4 w-4 text-pink-400" />
+                  </div>
+                  <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 animate-gradient-fast">{stats.streak == 1 ? `1 day` : `${stats.streak} days`}</div>
+                  <p className="text-xs text-gray-300">
+                    Keep it up!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">0 days</div>
+                  <p className="text-xs text-muted-foreground">
+                    Start your streak today!
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Study Time</CardTitle>
@@ -114,23 +155,6 @@ function Dashboard() {
                 </p>
               </CardContent>
             </Card>
-
-            {stats?.streak && stats.streak > 1 && (
-              <Card className="relative group overflow-hidden">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 p-[1px] opacity-70"></div>
-                <div className="absolute inset-[1px] bg-card rounded-lg"></div>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-pink-400" />
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 animate-gradient-fast">{stats?.streak} days</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats && stats.streak > 0 ? "Keep it up!" : "Start your streak today!"}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
 
             {stats?.groupRank && (
               <Card>
