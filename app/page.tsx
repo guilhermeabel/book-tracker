@@ -4,6 +4,7 @@ import GroupsLeaderboard from "@/components/groups-leaderboard"
 import { AppHeader } from "@/components/homepage/app-header"
 import { HeaderSkeleton } from "@/components/homepage/skeletons/header-skeleton"
 import { StatsCardSkeleton } from "@/components/homepage/skeletons/stats-skeleton"
+import LandingPage from "@/components/landing-page"
 import RecentActivity from "@/components/recent-activity"
 import StudyLogForm from "@/components/study-log-form"
 import StudyStats from "@/components/study-stats"
@@ -11,13 +12,26 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAuth } from "@/lib/hooks/use-auth"
 import { useGroups } from "@/lib/hooks/use-groups"
 import { useStudyStats } from "@/lib/hooks/use-study-stats"
 import { ArrowUp, Clock, Plus, TrendingUp, Trophy, Users } from "lucide-react"
 import Link from "next/link"
 import { Suspense, useState } from "react"
 
-export default function Dashboard() {
+export default function Home() {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
+
+  // Show landing page for non-authenticated users
+  if (!isAuthLoading && !isAuthenticated) {
+    return <LandingPage />
+  }
+
+  // Show dashboard for authenticated users
+  return <Dashboard />
+}
+
+function Dashboard() {
   const { data: groups, isLoading: isLoadingGroups } = useGroups()
   const { data: stats, isLoading: isLoadingStats } = useStudyStats()
   const [drawerOpen, setDrawerOpen] = useState(false)
