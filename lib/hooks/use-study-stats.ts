@@ -7,6 +7,8 @@ type StudyStats = {
   totalHours: number
   weeklyChange: number
   streak: number
+  previousStreak: number
+  streakIsAtRisk: boolean
   groupRank?: {
     rank: number
     groupName: string
@@ -81,11 +83,19 @@ export function useStudyStats() {
       const weeklyChange = currentWeekHours - lastWeekHours
 
       // Calculate streak
-      let streak = 0
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       
-      for (let i = 0; i < 7; i++) {
+      // Check if user has studied today
+      const hasStudiedToday = studyLogs.some(log => {
+        const logDate = new Date(log.created_at)
+        logDate.setHours(0, 0, 0, 0)
+        return logDate.getTime() === today.getTime()
+      })
+
+      // Calculate current streak (including today if they've studied)
+      let streak = 0
+      for (let i = 0; i < 30; i++) {
         const checkDate = new Date(today)
         checkDate.setDate(checkDate.getDate() - i)
         
@@ -101,6 +111,33 @@ export function useStudyStats() {
           break
         }
       }
+      
+      // Calculate previous streak (not including today)
+      let previousStreak = 0
+      if (!hasStudiedToday && streak === 0) {
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
+        
+        for (let i = 0; i < 30; i++) {
+          const checkDate = new Date(yesterday)
+          checkDate.setDate(checkDate.getDate() - i)
+          
+          const hasStudyLog = studyLogs.some(log => {
+            const logDate = new Date(log.created_at)
+            logDate.setHours(0, 0, 0, 0)
+            return logDate.getTime() === checkDate.getTime()
+          })
+
+          if (hasStudyLog) {
+            previousStreak++
+          } else {
+            break
+          }
+        }
+      }
+      
+      // Determine if streak is at risk (had a previous streak but hasn't studied today)
+      const streakIsAtRisk = !hasStudiedToday && previousStreak > 0
 
       // Get group rank if user is in a group
       const { data: groupMembers } = await supabase
@@ -145,6 +182,8 @@ export function useStudyStats() {
         totalHours: Math.round(totalHours * 10) / 10,
         weeklyChange: Math.round(weeklyChange * 10) / 10,
         streak,
+        previousStreak,
+        streakIsAtRisk,
         groupRank
       } as StudyStats
     }

@@ -21,7 +21,7 @@ import { useAuth } from "@/lib/hooks/use-auth"
 import { useGroups } from "@/lib/hooks/use-groups"
 import { useUserProfile } from "@/lib/hooks/use-profile"
 import { useStudyStats } from "@/lib/hooks/use-study-stats"
-import { ArrowUp, Clock, Plus, TrendingUp, Trophy, Users } from "lucide-react"
+import { AlertTriangle, ArrowUp, Clock, Plus, TrendingUp, Trophy, Users } from "lucide-react"
 import Link from "next/link"
 import { Suspense, useState } from "react"
 
@@ -197,17 +197,29 @@ function Dashboard() {
                   </>
                 ) : (
                   <>
-                    {stats && stats.streak > 0 ? (
-                      <div className="relative p-[1px] rounded-xl transform rotate-1 animate-float overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 rounded-xl"></div>
+                    {stats && (stats.streak > 0 || stats.streakIsAtRisk) ? (
+                      <div className={`relative p-[1px] rounded-xl transform ${stats.streakIsAtRisk ? '' : 'rotate-1 animate-float'} overflow-hidden`}>
+                        <div className={`absolute inset-0 bg-gradient-to-r ${stats.streakIsAtRisk ? 'from-yellow-400 via-orange-500 to-red-500' : 'from-indigo-400 via-purple-500 to-pink-500'} rounded-xl`}></div>
                         <div className="relative bg-gray-800/90 backdrop-blur-md rounded-xl p-6 shadow-lg h-full">
                           <div className="flex items-center justify-between">
                             <h3 className="text-sm font-medium mb-2">Study Streak</h3>
-                            <TrendingUp className="h-4 w-4 text-pink-400" />
+                            {stats.streakIsAtRisk ? (
+                              <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                            ) : (
+                              <TrendingUp className="h-4 w-4 text-pink-400" />
+                            )}
                           </div>
-                          <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 animate-gradient-fast">{stats.streak == 1 ? `1 day` : `${stats.streak} days`}</div>
+                          <div className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stats.streakIsAtRisk ? 'from-yellow-400 via-orange-500 to-red-500' : 'from-indigo-400 via-purple-500 to-pink-500'} animate-gradient-fast`}>
+                            {stats.streakIsAtRisk ?
+                              `${stats.previousStreak} ${stats.previousStreak === 1 ? 'day' : 'days'}` :
+                              `${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}`
+                            }
+                          </div>
                           <p className="text-xs text-gray-300">
-                            Keep it up!
+                            {stats.streakIsAtRisk ?
+                              'Study today to avoid losing your streak!' :
+                              'Keep it up!'
+                            }
                           </p>
                         </div>
                       </div>
