@@ -2,8 +2,9 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { User } from "@supabase/supabase-js"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createContext, useContext, useEffect, useState } from "react"
+import { toast } from "sonner"
 
 type AuthContextType = {
   user: User | null
@@ -15,11 +16,59 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const getSiteUrl = () => {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
+  }
+
+  return process.env.DEV_SITE_URL
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const code = searchParams.get('code')
+
+    if (code) {
+      const handleEmailVerification = async () => {
+        try {
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (error) {
+            console.error('Error exchanging code for session:', error)
+            toast.error('Email verification failed. Please try again.')
+          } else {
+            toast.success('Email verified successfully!')
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (user) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', user.id)
+                .single()
+
+              if (!profile) {
+                router.push('/onboarding')
+              } else {
+                router.push('/')
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error verifying email:', error)
+          toast.error('Something went wrong during verification.')
+        }
+      }
+
+      handleEmailVerification()
+    }
+  }, [searchParams, supabase, router])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -36,10 +85,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase])
 
   const signUp = async (email: string, password: string) => {
+    const siteUrl = getSiteUrl()
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${siteUrl}`
+      }
     })
+
     if (error) throw error
   }
 
@@ -64,10 +119,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 } 

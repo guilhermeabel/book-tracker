@@ -2,25 +2,39 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-const publicRoutes = ['/auth', '/auth/signin', '/auth/signup', '/']
+const publicRoutes = ['/auth', '/auth/signin', '/auth/signup', '/', '/auth/update-password', '/auth/reset-password']
 
 export async function middleware(request: NextRequest) {
   const res = NextResponse.next()
-  
-  // Add debug headers
-  res.headers.set('x-middleware-debug', 'true')
-  res.headers.set('x-middleware-path', request.nextUrl.pathname)
-  
+
   const supabase = createMiddlewareClient({ req: request, res })
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // Add session debug header
   res.headers.set('x-middleware-session', session ? 'true' : 'false')
   if (session) {
     res.headers.set('x-middleware-user-id', session.user.id)
+  }
+
+  const hasAuthCode = request.nextUrl.searchParams.has('code');
+  const isRecovery = request.nextUrl.searchParams.get('type') === 'recovery';
+  const isPasswordReset = request.nextUrl.pathname === '/' && (hasAuthCode || isRecovery);
+
+  if (isPasswordReset) {
+    const redirectUrl = new URL('/auth/update-password', request.url);
+    
+    for (const [key, value] of request.nextUrl.searchParams.entries()) {
+      redirectUrl.searchParams.set(key, value);
+    }
+    
+    return NextResponse.redirect(redirectUrl);
+  }
+  
+  const isVerificationCallback = request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code');
+  if (isVerificationCallback && !isRecovery) {
+    return res;
   }
 
   if (!session && !publicRoutes.includes(request.nextUrl.pathname)) {
@@ -29,21 +43,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // If user is signed in
   if (session) {
-    // Check if user has a profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
       .eq('id', session.user.id)
       .single()
 
-    // If no profile and not already on onboarding, redirect to onboarding
     if (!profile && !request.nextUrl.pathname.startsWith('/onboarding')) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
     }
 
-    // If has profile and on onboarding, redirect to home
     if (profile && request.nextUrl.pathname.startsWith('/onboarding')) {
       return NextResponse.redirect(new URL('/', request.url))
     }

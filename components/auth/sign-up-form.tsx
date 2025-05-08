@@ -25,6 +25,8 @@ type SignUpFormData = z.infer<typeof signUpSchema>
 export function SignUpForm() {
   const { signUp } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const [isAccountCreated, setIsAccountCreated] = useState(false)
+  const [userEmail, setUserEmail] = useState("")
 
   const {
     register,
@@ -38,13 +40,43 @@ export function SignUpForm() {
     try {
       setIsLoading(true)
       await signUp(data.email, data.password)
-      toast.success("Account created successfully! Please check your email to confirm your account.")
+      setUserEmail(data.email)
+      setIsAccountCreated(true)
+      toast.success("Account created successfully!")
     } catch (error) {
       console.error("Sign up error:", error)
       toast.error("Failed to create account. Please try again.")
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isAccountCreated) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Verify Your Email</CardTitle>
+          <CardDescription>
+            We've sent a verification link to {userEmail}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Please check your email inbox and click the verification link to activate your account.
+            If you don't see the email, please check your spam folder.
+          </p>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-muted-foreground">
+            After verification, you can{" "}
+            <a href="/auth/signin" className="text-primary hover:underline">
+              sign in
+            </a>{" "}
+            to your account.
+          </p>
+        </CardFooter>
+      </Card>
+    )
   }
 
   return (
@@ -95,7 +127,7 @@ export function SignUpForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? "Creating account..." : "Create Account"}
           </Button>
         </CardFooter>
