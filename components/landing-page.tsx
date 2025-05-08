@@ -7,21 +7,20 @@ import Link from "next/link"
 export default function LandingPage() {
 
 	return (
-		<div className="min-h-screen relative overflow-hidden bg-black">
-			{/* Subtle animated gradient background */}
+		<div className="fixed inset-0 overflow-y-auto overflow-x-hidden">
+			{/* Main gradient background */}
 			<div
-				className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-black 
-				opacity-80"
+				className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-black"
 			/>
 
-			{/* Animated wave effect similar to TanStack */}
-			<div className="absolute inset-0 opacity-20 pointer-events-none z-10">
+			{/* Animated effects overlay */}
+			<div className="fixed inset-0 pointer-events-none">
 				<div className="absolute w-full h-full bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,0,0,0))]"></div>
 				<div className="absolute w-full h-full bg-[radial-gradient(circle_at_80%_20%,rgba(69,179,224,0.2),rgba(0,0,255,0))]"></div>
-				<div className="w-full h-full bg-[url('data:image/svg+xml,%3Csvg viewBox=%270 0 200 200%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noise%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.65%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url%28%23noise%29%27/%3E%3C/svg%3E')]"></div>
+				<div className="w-full h-full opacity-20 bg-[url('data:image/svg+xml,%3Csvg viewBox=%270 0 200 200%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noise%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.65%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url%28%23noise%29%27/%3E%3C/svg%3E')]"></div>
 			</div>
 
-			<div className="relative z-20 container mx-auto px-4 py-20 min-h-screen flex flex-col">
+			<div className="relative min-h-screen flex flex-col max-w-screen-xl mx-auto px-4 sm:px-6 md:px-8 py-20">
 				<header className="flex justify-between items-center mb-12">
 					<div className="flex items-center">
 						<h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500">
