@@ -31,11 +31,11 @@ export default function Home() {
 
   if (isAuthLoading) {
     return (
-      <div className="container mx-auto py-6 space-y-8 pt-12">
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="max-w-2xl mx-auto mb-10 space-y-4">
-            <AppWelcome />
-            <Skeleton className="h-5 w-96 mx-auto" />
+      <div className="py-6 space-y-8 pt-12">
+        <div className="flex flex-col items-center justify-center py-8 sm:py-16 px-4 text-center">
+          <div className="max-w-2xl mx-auto mb-6 sm:mb-10 space-y-4">
+            <Skeleton className="h-8 w-[200px] mx-auto" />
+            <Skeleton className="h-4 w-full max-w-xs mx-auto" />
           </div>
           <ProfileSetupSkeleton />
         </div>
@@ -49,11 +49,11 @@ export default function Home() {
 
   if (isLoadingProfile && needsProfileSetup) {
     return (
-      <div className="container mx-auto py-6 space-y-8 pt-12">
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="max-w-2xl mx-auto mb-10 space-y-4">
-            <AppWelcome />
-            <Skeleton className="h-5 w-96 mx-auto" />
+      <div className="py-6 space-y-8 pt-12">
+        <div className="flex flex-col items-center justify-center py-8 sm:py-16 px-4 text-center">
+          <div className="max-w-2xl mx-auto mb-6 sm:mb-10 space-y-4">
+            <Skeleton className="h-8 w-[200px] mx-auto" />
+            <Skeleton className="h-4 w-full max-w-xs mx-auto" />
           </div>
           <ProfileSetupSkeleton />
         </div>
@@ -75,14 +75,14 @@ function Dashboard() {
   const isNewUser = hasNoGroups && hasNoActivity
 
   return (
-    <div className="container mx-auto py-6 space-y-8 pt-12">
+    <div className="py-6 space-y-8 pt-12">
       {needsProfileSetup ? (
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="max-w-2xl mx-auto mb-10 space-y-4">
-            <div className="flex flex-row gap-1 items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-8 sm:py-16 px-4 text-center">
+          <div className="max-w-2xl mx-auto mb-6 sm:mb-10 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-1 items-center justify-center">
               <AppWelcome />
             </div>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base sm:text-lg">
               Before you start, let's set up your profile.
             </p>
           </div>
@@ -97,14 +97,14 @@ function Dashboard() {
               {!isNewUser && groups && groups.length > 0 && (
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                   <AppHeader />
-                  <div className="flex gap-2">
-                    <Button asChild variant="outline">
+                  <div className="flex flex-wrap gap-2 w-full md:w-auto mt-4 md:mt-0">
+                    <Button asChild variant="outline" className="flex-1 md:flex-none">
                       <Link href="/groups">
                         <Users className="mr-2 h-4 w-4" />
                         My Groups
                       </Link>
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="flex-1 md:flex-none">
                       <Link href="/groups/join">
                         <Users className="mr-2 h-4 w-4" />
                         Join Group
@@ -112,7 +112,7 @@ function Dashboard() {
                     </Button>
                     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
                       <DrawerTrigger asChild>
-                        <Button>
+                        <Button className="flex-1 md:flex-none">
                           <Plus className="mr-2 h-4 w-4" />
                           New Study
                         </Button>
@@ -137,20 +137,20 @@ function Dashboard() {
           )}
 
           {isNewUser ? (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-              <div className="max-w-2xl mx-auto mb-10 space-y-4">
-                <div className="flex flex-row gap-1 items-center justify-center">
+            <div className="flex flex-col items-center justify-center py-8 sm:py-16 px-4 text-center">
+              <div className="max-w-2xl mx-auto mb-6 sm:mb-10 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-1 items-center justify-center">
                   <AppWelcome />
                 </div>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-base sm:text-lg">
                   Track your reading progress, join study groups, and compete with friends.
                 </p>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm sm:text-base">
                   Get started by joining a group or creating your own.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 w-full max-w-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mt-6 w-full max-w-2xl">
                 <Card className="transition-all hover:shadow-lg border-primary/10 hover:border-primary/30">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-center">Join a Group</CardTitle>
@@ -188,7 +188,7 @@ function Dashboard() {
             </div>
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {isLoadingStats ? (
                   <>
                     <StatsCardSkeleton />
@@ -282,10 +282,10 @@ function Dashboard() {
                 <TabsSkeleton />
               ) : (
                 <Tabs defaultValue="activity" className="space-y-4">
-                  <TabsList>
-                    <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-                    <TabsTrigger value="stats">My Stats</TabsTrigger>
-                    <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+                  <TabsList className="w-full flex justify-between overflow-x-auto">
+                    <TabsTrigger className="flex-1" value="activity">Recent Activity</TabsTrigger>
+                    <TabsTrigger className="flex-1" value="stats">My Stats</TabsTrigger>
+                    <TabsTrigger className="flex-1" value="leaderboard">Leaderboard</TabsTrigger>
                   </TabsList>
                   <TabsContent value="activity" className="space-y-4">
                     <Suspense fallback={<StatsCardSkeleton />}>

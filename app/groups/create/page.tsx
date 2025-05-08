@@ -16,7 +16,7 @@ export default async function CreateGroupPage() {
   }
 
   return (
-    <div className="container max-w-md mx-auto py-12">
+    <div className="max-w-md mx-auto py-8 md:py-12">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Create Group</h1>
         <Button variant="outline" size="icon" asChild>

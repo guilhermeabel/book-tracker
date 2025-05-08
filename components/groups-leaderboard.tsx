@@ -13,13 +13,22 @@ export default function GroupsLeaderboard() {
 		return (
 			<Card>
 				<CardHeader>
-					<Skeleton className="h-6 w-48" />
-					<Skeleton className="h-4 w-72" />
+					<Skeleton className="h-6 w-40" />
+					<Skeleton className="h-4 w-full max-w-xs" />
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
 						{[1, 2, 3].map((i) => (
-							<Skeleton key={i} className="h-16 w-full" />
+							<div key={i} className="p-2">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										<Skeleton className="h-8 w-8 rounded-full" />
+										<Skeleton className="h-8 w-8 rounded-full" />
+										<Skeleton className="h-4 w-24" />
+									</div>
+									<Skeleton className="h-8 w-16" />
+								</div>
+							</div>
 						))}
 					</div>
 				</CardContent>
@@ -43,13 +52,22 @@ function GroupLeaderboardCard({ groupId }: { groupId: string }) {
 		return (
 			<Card>
 				<CardHeader>
-					<Skeleton className="h-6 w-48" />
-					<Skeleton className="h-4 w-72" />
+					<Skeleton className="h-6 w-40" />
+					<Skeleton className="h-4 w-full max-w-xs" />
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
 						{[1, 2, 3].map((i) => (
-							<Skeleton key={i} className="h-16 w-full" />
+							<div key={i} className="p-2">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										<Skeleton className="h-8 w-8 rounded-full" />
+										<Skeleton className="h-8 w-8 rounded-full" />
+										<Skeleton className="h-4 w-24" />
+									</div>
+									<Skeleton className="h-8 w-16" />
+								</div>
+							</div>
 						))}
 					</div>
 				</CardContent>
@@ -71,24 +89,26 @@ function GroupLeaderboardCard({ groupId }: { groupId: string }) {
 					{sortedMembers.slice(0, 3).map((member, index) => (
 						<div
 							key={member.id}
-							className={`flex items-center justify-between p-3 rounded-lg ${member.isCurrentUser ? "bg-primary/10 border border-primary/20" : "hover:bg-muted"
+							className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg gap-2 ${member.isCurrentUser
+								? "bg-primary/10 border border-primary/20"
+								: "hover:bg-muted"
 								}`}
 						>
-							<div className="flex items-center gap-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted font-medium">
+							<div className="flex items-center gap-2 sm:gap-4">
+								<div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted font-medium flex-shrink-0">
 									{index + 1}
 								</div>
-								<Avatar>
+								<Avatar className="flex-shrink-0">
 									<AvatarImage src={member.avatar_url || "/placeholder.svg"} alt={member.name} />
 									<AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
 								</Avatar>
-								<div>
-									<p className="font-medium">{member.name}</p>
+								<div className="min-w-0">
+									<p className="font-medium truncate">{member.name}</p>
 								</div>
 							</div>
-							<div className="text-right">
-								<p className="font-medium">{member.hours} hours</p>
-								<p className="text-sm text-muted-foreground">total study time</p>
+							<div className="text-left sm:text-right ml-10 sm:ml-0">
+								<p className="font-medium">{member.hours * 60} minutes</p>
+								<p className="text-xs sm:text-sm text-muted-foreground">total study time</p>
 							</div>
 						</div>
 					))}

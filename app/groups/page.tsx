@@ -67,13 +67,13 @@ async function GroupsList() {
             <p>Join or create a group to start studying with others!</p>
           </div>
         </CardContent>
-        <CardFooter className="flex space-x-4">
-          <Button asChild>
+        <CardFooter className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+          <Button asChild className="w-full">
             <Link href="/groups/join">
               Join a Group
             </Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="w-full">
             <Link href="/groups/create">
               Create Group
             </Link>
@@ -126,13 +126,13 @@ async function GroupsList() {
             <p>Join or create a group to start studying with others!</p>
           </div>
         </CardContent>
-        <CardFooter className="flex space-x-4">
-          <Button asChild>
+        <CardFooter className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+          <Button asChild className="w-full">
             <Link href="/groups/join">
               Join a Group
             </Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="w-full">
             <Link href="/groups/create">
               Create Group
             </Link>
@@ -143,7 +143,7 @@ async function GroupsList() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
       {groups?.map((group: Group) => (
         <Card key={group.id} className="flex flex-col">
           <CardHeader>
@@ -171,17 +171,17 @@ async function GroupsList() {
 
 function GroupsListSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
       {[1, 2].map((i) => (
         <Card key={i} className="flex flex-col">
           <CardHeader>
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-72" />
+            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="h-4 w-full" />
           </CardHeader>
           <CardContent className="flex-1">
             <div className="flex items-center space-x-2">
               <Skeleton className="h-4 w-4" />
-              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-4 w-full max-w-[160px]" />
             </div>
           </CardContent>
           <CardFooter>
@@ -198,16 +198,16 @@ export default async function GroupsPage() {
   const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
   return (
-    <div className="container max-w-2xl mx-auto py-12">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-2xl mx-auto py-8 md:py-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold">Study Groups</h1>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button asChild variant="outline" className="flex-1 sm:flex-none">
             <Link href="/">
               Back
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="flex-1 sm:flex-none">
             <Link href="/groups/create">
               Create Group
             </Link>

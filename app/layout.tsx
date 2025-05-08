@@ -29,7 +29,9 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              {children}
+              <div className="px-4 sm:px-6 md:px-8 max-w-screen-xl mx-auto">
+                {children}
+              </div>
               <Toaster />
             </AuthProvider>
           </QueryProvider>

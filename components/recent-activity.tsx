@@ -65,22 +65,24 @@ export default function RecentActivity() {
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className={`flex items-start gap-4 ${activity.isCurrentUser ? "bg-primary/10 p-3 rounded-lg border border-primary/20" : ""
+              className={`flex items-start gap-3 ${activity.isCurrentUser
+                ? "bg-primary/10 p-3 rounded-lg border border-primary/20"
+                : ""
                 }`}
             >
-              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <div className="flex-shrink-0 h-10 w-10 overflow-hidden rounded-full bg-muted flex items-center justify-center">
                 {activity.user.avatar_url ? (
                   <img
                     src={activity.user.avatar_url}
                     alt={activity.user.name || ""}
-                    className="h-10 w-10 rounded-full"
+                    className="h-full w-full object-cover rounded-full"
                   />
                 ) : (
                   <Users className="h-5 w-5 text-muted-foreground" />
                 )}
               </div>
-              <div className="space-y-1">
-                <p className="text-sm">
+              <div className="flex-1 min-w-0 space-y-2">
+                <p className="text-sm break-words">
                   <span className="font-medium">{activity.user.name}</span>{" "}
                   {activity.type === "study_log" ? "logged study time for" : "joined group"}{" "}
                   {activity.type === "study_log" && activity.subject && (
@@ -90,18 +92,18 @@ export default function RecentActivity() {
                     <span className="font-medium">{activity.group.name}</span>
                   )}
                 </p>
-                <div className="flex items-center text-xs text-muted-foreground gap-3">
-                  <span>{formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}</span>
+                <div className="flex flex-wrap items-center text-xs text-muted-foreground gap-y-2">
+                  <span className="w-full sm:w-auto">{formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}</span>
                   {activity.type === "study_log" && activity.minutes && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
+                    <span className="flex items-center gap-1 mr-3">
+                      <Clock className="h-3 w-3 flex-shrink-0" />
                       {activity.minutes} minutes
                     </span>
                   )}
                   {activity.type === "study_log" && activity.group && (
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="h-3 w-3" />
-                      {activity.group.name}
+                    <span className="flex items-center gap-1 truncate max-w-[150px]">
+                      <BookOpen className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{activity.group.name}</span>
                     </span>
                   )}
                 </div>

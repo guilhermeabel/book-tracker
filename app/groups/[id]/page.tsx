@@ -401,7 +401,7 @@ export default async function GroupDetailsPage({ params }: { params: { id: strin
   const { id } = await params;
 
   return (
-    <div className="container max-w-2xl mx-auto py-12">
+    <div className="max-w-2xl mx-auto py-8 md:py-12">
       <Suspense fallback={<GroupDetailsSkeleton />}>
         <GroupDetails groupId={id} />
       </Suspense>
