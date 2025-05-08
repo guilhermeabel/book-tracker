@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -6,12 +7,14 @@ import { ArrowLeft, Users } from "lucide-react"
 import { cookies } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react"
+import GroupInviteCode from "./invite-code"
 
 interface Group {
   id: string
   name: string
   description: string | null
   created_at: string
+  invite_code: string
   group_members: Array<{
     role: string
     user: {
@@ -72,7 +75,8 @@ async function GroupDetails({ groupId }: { groupId: string }) {
         id,
         name,
         description,
-        created_at
+        created_at,
+        invite_code
       `)
       .eq('id', groupId)
       .single();
@@ -180,6 +184,16 @@ async function GroupDetails({ groupId }: { groupId: string }) {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
+              <CardTitle>Group Invite</CardTitle>
+              <CardDescription>Share this code to invite others</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <GroupInviteCode inviteCode={fullGroup.invite_code} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Group Members</CardTitle>
               <CardDescription>People in this study group</CardDescription>
             </CardHeader>
@@ -269,7 +283,17 @@ function GroupDetailsSkeleton() {
         <Skeleton className="h-10 w-10" />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />
