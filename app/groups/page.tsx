@@ -18,8 +18,76 @@ interface Group {
 }
 
 async function GroupsList() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: groups } = await supabase
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+
+  // Get the current user
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Not Authorized</CardTitle>
+          <CardDescription>Please sign in to view your groups.</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
+  // Get the user's group memberships first
+  const { data: memberships, error: membershipError } = await supabase
+    .from('group_members')
+    .select('group_id')
+    .eq('user_id', user.id)
+
+  if (membershipError) {
+    console.error("Error fetching memberships:", membershipError)
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+          <CardDescription>Failed to load your groups. Please try again.</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
+  // If user has no memberships, show the empty state
+  if (!memberships || memberships.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>No Groups Yet</CardTitle>
+          <CardDescription>You haven't joined any study groups yet.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <p>Join or create a group to start studying with others!</p>
+          </div>
+        </CardContent>
+        <CardFooter className="flex space-x-4">
+          <Button asChild>
+            <Link href="/groups/join">
+              Join a Group
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/groups/create">
+              Create Group
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    )
+  }
+
+  // Extract the group IDs the user is a member of
+  const groupIds = memberships.map(m => m.group_id)
+
+  // Fetch details for those groups
+  const { data: groups, error: groupsError } = await supabase
     .from('groups')
     .select(`
       id,
@@ -30,7 +98,20 @@ async function GroupsList() {
         role
       )
     `)
+    .in('id', groupIds)
     .order('name')
+
+  if (groupsError) {
+    console.error("Error fetching groups:", groupsError)
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+          <CardDescription>Failed to load your groups. Please try again.</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
 
   if (groups?.length === 0) {
     return (
@@ -112,7 +193,10 @@ function GroupsListSkeleton() {
   )
 }
 
-export default function GroupsPage() {
+export default async function GroupsPage() {
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+
   return (
     <div className="container max-w-2xl mx-auto py-12">
       <div className="flex justify-between items-center mb-8">

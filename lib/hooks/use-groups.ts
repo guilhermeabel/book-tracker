@@ -18,10 +18,9 @@ const fetchGroups = async (): Promise<Group[]> => {
     return []
   }
   
-  // First query - get memberships
   const { data: memberships, error: membershipError } = await supabase
     .from('group_members')
-    .select('*') // Select all columns for debugging
+    .select('*')
     .eq('user_id', user.id)
   
   if (membershipError) {
@@ -35,7 +34,6 @@ const fetchGroups = async (): Promise<Group[]> => {
   
   const groupIds = memberships.map(m => m.group_id)
   
-  // Second query - get groups
   const { data: groups, error: groupsError } = await supabase
     .from('groups')
     .select('*')

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -66,9 +65,65 @@ function GroupErrorDisplay() {
 }
 
 async function GroupDetails({ groupId }: { groupId: string }) {
-  const supabase = createServerComponentClient({ cookies })
+  // Await the cookies to fix the error
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
   try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Not Authorized</CardTitle>
+            <CardDescription>Please sign in to view group details.</CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button asChild>
+              <Link href="/auth">Sign In</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      )
+    }
+
+    // Check if the user is a member of this group
+    const { data: membership, error: membershipError } = await supabase
+      .from('group_members')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (membershipError && membershipError.code !== 'PGRST116') {
+      console.error("Error checking membership:", membershipError)
+      return <GroupErrorDisplay />
+    }
+
+    // If no membership was found, the user is not a member of this group
+    if (!membership) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Access Denied</CardTitle>
+            <CardDescription>You are not a member of this group.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              You need to be a member of this group to view its details.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild>
+              <Link href="/groups">Back to My Groups</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      )
+    }
+
     const { data: group, error: groupError } = await supabase
       .from('groups')
       .select(`
@@ -342,10 +397,13 @@ function GroupDetailsSkeleton() {
 }
 
 export default async function GroupDetailsPage({ params }: { params: { id: string } }) {
+  // Await the params to fix the error
+  const { id } = await params;
+
   return (
     <div className="container max-w-2xl mx-auto py-12">
       <Suspense fallback={<GroupDetailsSkeleton />}>
-        <GroupDetails groupId={params.id} />
+        <GroupDetails groupId={id} />
       </Suspense>
     </div>
   )

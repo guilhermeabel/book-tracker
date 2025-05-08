@@ -7,7 +7,8 @@ import { redirect } from "next/navigation"
 import { CreateGroupForm } from "./create-group-form"
 
 export default async function CreateGroupPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
