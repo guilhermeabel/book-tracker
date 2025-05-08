@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils"
 interface LoadingProps {
 	className?: string
 	size?: "sm" | "md" | "lg"
+	height?: string
 }
 
-export function Loading({ className, size = "lg" }: LoadingProps) {
+export function Loading({ className, size = "lg", height = "min-h-screen" }: LoadingProps) {
 	const sizeClasses = {
 		sm: "w-8 h-8",
 		md: "w-12 h-12",
@@ -15,7 +16,7 @@ export function Loading({ className, size = "lg" }: LoadingProps) {
 	}
 
 	return (
-		<div className="flex items-center justify-center min-h-screen">
+		<div className={cn("flex items-center justify-center", height)}>
 			<div className={cn("relative", sizeClasses[size])}>
 				<div
 					className={cn(
@@ -26,7 +27,7 @@ export function Loading({ className, size = "lg" }: LoadingProps) {
 				/>
 				<div
 					className={cn(
-						"absolute inset-[4px] rounded-full bg-background",
+						"absolute inset-[4px] rounded-full bg-gradient-to-br from-gray-900 via-gray-900 to-black opacity-100",
 					)}
 				/>
 			</div>

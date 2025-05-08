@@ -19,7 +19,7 @@ export default async function CreateGroupPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Create Group</h1>
         <Button variant="outline" size="icon" asChild>
-          <Link href="/groups">
+          <Link href="/">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
