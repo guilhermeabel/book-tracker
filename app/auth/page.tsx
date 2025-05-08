@@ -1,6 +1,9 @@
+"use client"
+
 import { SignInForm } from "@/components/auth/sign-in-form"
 import { SignUpForm } from "@/components/auth/sign-up-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Suspense } from "react"
 
 export default function AuthPage() {
   return (
@@ -11,7 +14,9 @@ export default function AuthPage() {
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
         </TabsList>
         <TabsContent value="signin">
-          <SignInForm />
+          <Suspense fallback={<div className="animate-pulse h-[350px] bg-muted rounded-lg"></div>}>
+            <SignInForm />
+          </Suspense>
           {/* <p className="text-center text-sm text-muted-foreground mt-4">
             <Link href="/auth/reset-password" className="text-primary hover:underline">
               Forgot your password?
@@ -19,7 +24,9 @@ export default function AuthPage() {
           </p> */}
         </TabsContent>
         <TabsContent value="signup">
-          <SignUpForm />
+          <Suspense fallback={<div className="animate-pulse h-[350px] bg-muted rounded-lg"></div>}>
+            <SignUpForm />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
