@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -39,13 +40,20 @@ export function SignUpForm() {
   const onSubmit = async (data: SignUpFormData) => {
     try {
       setIsLoading(true)
-      await signUp(data.email, data.password)
       setUserEmail(data.email)
+
+      await signUp(data.email, data.password)
+
       setIsAccountCreated(true)
-      toast.success("Account created successfully!")
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign up error:", error)
-      toast.error("Failed to create account. Please try again.")
+
+      if (error?.message?.toLowerCase().includes('user already registered')) {
+        toast.info("If this email is not registered, you'll receive a verification link.")
+        setIsAccountCreated(true)
+      } else {
+        toast.error("Failed to create account. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -55,7 +63,7 @@ export function SignUpForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Verify Your Email</CardTitle>
+          <CardTitle>Check Your Email</CardTitle>
           <CardDescription>
             We've sent a verification link to {userEmail}
           </CardDescription>
@@ -63,17 +71,23 @@ export function SignUpForm() {
         <CardContent>
           <p className="text-sm text-muted-foreground">
             Please check your email inbox and click the verification link to activate your account.
-            If you don't see the email, please check your spam folder.
+            If you don't see the email within a few minutes, please check your spam folder.
           </p>
+          <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-md">
+            <p className="text-sm text-amber-800 dark:text-amber-400">
+              <strong>Important:</strong> You need to verify your email before you can sign in.
+            </p>
+          </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center space-y-2 flex-col">
           <p className="text-sm text-muted-foreground">
-            After verification, you can{" "}
-            <a href="/auth/signin" className="text-primary hover:underline">
-              sign in
-            </a>{" "}
-            to your account.
+            After verification, you can sign in to your account
           </p>
+          <Button asChild variant="outline">
+            <Link href="/auth/signin">
+              Go to Sign In
+            </Link>
+          </Button>
         </CardFooter>
       </Card>
     )

@@ -1,7 +1,6 @@
 import { SignInForm } from "@/components/auth/sign-in-form"
 import { SignUpForm } from "@/components/auth/sign-up-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Link from "next/link"
 
 export default function AuthPage() {
   return (
@@ -13,11 +12,11 @@ export default function AuthPage() {
         </TabsList>
         <TabsContent value="signin">
           <SignInForm />
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          {/* <p className="text-center text-sm text-muted-foreground mt-4">
             <Link href="/auth/reset-password" className="text-primary hover:underline">
               Forgot your password?
             </Link>
-          </p>
+          </p> */}
         </TabsContent>
         <TabsContent value="signup">
           <SignUpForm />

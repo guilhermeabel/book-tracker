@@ -1,12 +1,15 @@
 "use client"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { Check } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -21,6 +24,21 @@ type SignInFormData = z.infer<typeof signInSchema>
 export function SignInForm() {
   const { signIn } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const [showResetSuccess, setShowResetSuccess] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  // Check if we're arriving from a successful password reset
+  useEffect(() => {
+    if (searchParams.get('reset') === 'success') {
+      setShowResetSuccess(true)
+
+      // Clean up the URL without refreshing the page
+      const url = new URL(window.location.href)
+      url.searchParams.delete('reset')
+      window.history.replaceState({}, '', url)
+    }
+  }, [searchParams])
 
   const {
     register,
@@ -51,6 +69,14 @@ export function SignInForm() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          {showResetSuccess && (
+            <Alert className="bg-green-50 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-900/50 mb-4">
+              <Check className="h-4 w-4" />
+              <AlertDescription>
+                Your password has been successfully reset. You can now sign in with your new password.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -78,7 +104,7 @@ export function SignInForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </CardFooter>

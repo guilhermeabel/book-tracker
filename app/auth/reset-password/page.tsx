@@ -2,8 +2,16 @@
 
 import { ResetPasswordForm } from "@/components/auth/reset-password-form"
 import Link from "next/link"
+import { redirect } from "next/navigation"
+
+const isResetEnabled = false
 
 export default function ResetPasswordPage() {
+
+	if (!isResetEnabled) {
+		redirect('/')
+	}
+
 	return (
 		<div className="container max-w-md mx-auto py-12">
 			<div className="mb-4">

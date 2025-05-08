@@ -2,61 +2,46 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-const publicRoutes = ['/auth', '/auth/signin', '/auth/signup', '/', '/auth/update-password', '/auth/reset-password']
+// Routes that don't require authentication
+const publicRoutes = [
+  '/auth',
+  '/auth/signin',
+  '/auth/signup',
+  '/auth/verification-success',
+  '/'
+]
 
 export async function middleware(request: NextRequest) {
   const res = NextResponse.next()
-
   const supabase = createMiddlewareClient({ req: request, res })
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  res.headers.set('x-middleware-session', session ? 'true' : 'false')
-  if (session) {
-    res.headers.set('x-middleware-user-id', session.user.id)
-  }
+  // Simple checking for verification redirect
+  const { pathname, searchParams } = request.nextUrl
+  const token = searchParams.get('token')
+  const type = searchParams.get('type')
 
-  const hasAuthCode = request.nextUrl.searchParams.has('code');
-  const isRecovery = request.nextUrl.searchParams.get('type') === 'recovery';
-  const isPasswordReset = request.nextUrl.pathname === '/' && (hasAuthCode || isRecovery);
-
-  if (isPasswordReset) {
-    const redirectUrl = new URL('/auth/update-password', request.url);
+  // Handle email verification flow (signup)
+  if (token && type === 'signup') {
+    // Redirect to verification success page
+    const redirectUrl = new URL('/auth/verification-success', request.url)
     
-    for (const [key, value] of request.nextUrl.searchParams.entries()) {
-      redirectUrl.searchParams.set(key, value);
+    // Preserve all query parameters
+    for (const [key, value] of searchParams.entries()) {
+      redirectUrl.searchParams.set(key, value)
     }
     
-    return NextResponse.redirect(redirectUrl);
-  }
-  
-  const isVerificationCallback = request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code');
-  if (isVerificationCallback && !isRecovery) {
-    return res;
-  }
-
-  if (!session && !publicRoutes.includes(request.nextUrl.pathname)) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/auth'
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (session) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', session.user.id)
-      .single()
-
-    if (!profile && !request.nextUrl.pathname.startsWith('/onboarding')) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
-    }
-
-    if (profile && request.nextUrl.pathname.startsWith('/onboarding')) {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
+  // Protect non-public routes
+  if (!session && !publicRoutes.includes(pathname)) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/auth'
+    return NextResponse.redirect(redirectUrl)
   }
 
   return res

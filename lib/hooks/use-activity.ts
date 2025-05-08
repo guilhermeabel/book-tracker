@@ -103,7 +103,6 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
     return []
   }
 
-  // Create a map of user profiles
   const profileMap = Object.fromEntries(
     (profiles || []).map(profile => [profile.id, {
       id: profile.id,
@@ -112,7 +111,6 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
     }])
   )
 
-  // Transform study logs to activity items
   const studyLogActivities: ActivityItem[] = (studyLogs || []).map((log) => {
     const isCurrentUser = log.user_id === user.id;
     const profile = profileMap[log.user_id]
@@ -134,7 +132,6 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
     }
   })
   
-  // Fetch recent group joins
   const { data: recentJoins, error: joinsError } = await supabase
     .from('group_members')
     .select('id, joined_at, group_id, user_id')
@@ -147,11 +144,9 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
     return []
   }
   
-  // Transform joins to activity items
   const joinActivities: ActivityItem[] = (recentJoins || []).map((join) => {
-    // Use simple user ID handling without trying to fetch profiles
     const isCurrentUser = join.user_id === user.id;
-    const userName = isCurrentUser ? 'You' : `User ${join.user_id.substring(0, 6)}...`;
+    const userName = isCurrentUser ? 'You' : profileMap[join.user_id]?.name || `User ${join.user_id.substring(0, 6)}...`;
     
     return {
       id: `join-${join.id}`,

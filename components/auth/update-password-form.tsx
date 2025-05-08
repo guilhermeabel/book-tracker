@@ -24,7 +24,7 @@ type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>
 
 export function UpdatePasswordForm() {
 	const [isLoading, setIsLoading] = useState(false)
-	const [isRecovery, setIsRecovery] = useState(false)
+	const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 	const [error, setError] = useState<string | null>(null)
 	const router = useRouter()
 	const supabase = createClientComponentClient()
@@ -38,60 +38,98 @@ export function UpdatePasswordForm() {
 		resolver: zodResolver(updatePasswordSchema),
 	})
 
-	// Process recovery parameters and set up auth session
+	// Process recovery token
 	useEffect(() => {
-		const processRecoveryParams = async () => {
+		const processRecoveryToken = async () => {
 			try {
-				// Check for recovery parameters
-				const code = searchParams.get('code')
+				// Get the token from the URL
+				const token = searchParams.get('token')
 				const type = searchParams.get('type')
 
-				if (type === 'recovery' || code) {
-					setIsRecovery(true)
-
-					// For the case when we're using PKCE flow
-					if (code) {
-						// This will exchange the code for a session
-						const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-						if (error) {
-							console.error('Error processing recovery:', error)
-							setError('The recovery link is invalid or expired. Please request a new one.')
-						}
-					}
+				if (!token || type !== 'recovery') {
+					setStatus('error')
+					setError('Recovery parameters are missing or invalid. Please use the link from your email.')
+					return
 				}
+
+				// Use verifyOtp with token and recovery type
+				const { error } = await supabase.auth.verifyOtp({
+					token_hash: token,
+					type: 'recovery',
+				})
+
+				if (error) {
+					console.error('Error verifying recovery token:', error)
+					setStatus('error')
+
+					// Handle specific error messages
+					if (error.message.includes('expired')) {
+						setError('This recovery link has expired. Please request a new password reset link.')
+					} else {
+						setError('Invalid recovery link. Please request a new password reset.')
+					}
+					return
+				}
+
+				setStatus('ready')
 			} catch (err) {
-				console.error('Error processing recovery parameters:', err)
-				setError('An error occurred while processing your recovery link.')
+				console.error('Error processing recovery token:', err)
+				setStatus('error')
+				setError('An unexpected error occurred. Please try again.')
 			}
 		}
 
-		processRecoveryParams()
+		processRecoveryToken()
 	}, [searchParams, supabase.auth])
 
 	const onSubmit = async (data: UpdatePasswordFormData) => {
 		try {
 			setIsLoading(true)
 
+			// Update the user's password
 			const { error } = await supabase.auth.updateUser({
 				password: data.password,
 			})
 
-			if (error) throw error
+			if (error) {
+				console.error('Error updating password:', error)
+				throw error
+			}
 
 			toast.success("Password updated successfully")
 
-			// Redirect to sign-in after successful password reset
-			router.push("/auth/signin")
-		} catch (error) {
-			console.error("Update password error:", error)
-			toast.error("Failed to update password. Please try again.")
+			// Sign out after password reset
+			await supabase.auth.signOut()
+
+			// Redirect to sign-in page with success message
+			router.push('/auth/signin?reset=success')
+		} catch (error: any) {
+			console.error("Error updating password:", error)
+			toast.error(error.message || "Failed to update password. Please try again.")
 		} finally {
 			setIsLoading(false)
 		}
 	}
 
-	if (error) {
+	if (status === 'loading') {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Processing...</CardTitle>
+					<CardDescription>
+						Please wait while we verify your recovery link
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div className="flex justify-center py-4">
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+					</div>
+				</CardContent>
+			</Card>
+		)
+	}
+
+	if (status === 'error') {
 		return (
 			<Card className="border-red-100 bg-red-50/20 dark:border-red-900/40 dark:bg-red-950/10">
 				<CardHeader>
@@ -121,11 +159,8 @@ export function UpdatePasswordForm() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>{isRecovery ? "Reset Your Password" : "Update Password"}</CardTitle>
-				<CardDescription>{isRecovery
-					? "Create a new password for your account"
-					: "Enter your new password"}
-				</CardDescription>
+				<CardTitle>Reset Your Password</CardTitle>
+				<CardDescription>Create a new password for your account</CardDescription>
 			</CardHeader>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<CardContent className="space-y-4">
@@ -136,6 +171,7 @@ export function UpdatePasswordForm() {
 							type="password"
 							placeholder="Enter your new password"
 							{...register("password")}
+							autoComplete="new-password"
 						/>
 						{errors.password && (
 							<p className="text-sm text-red-500">{errors.password.message}</p>
@@ -149,6 +185,7 @@ export function UpdatePasswordForm() {
 							type="password"
 							placeholder="Confirm your new password"
 							{...register("confirmPassword")}
+							autoComplete="new-password"
 						/>
 						{errors.confirmPassword && (
 							<p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
@@ -157,9 +194,7 @@ export function UpdatePasswordForm() {
 				</CardContent>
 				<CardFooter>
 					<Button type="submit" disabled={isLoading} className="w-full">
-						{isLoading
-							? (isRecovery ? "Resetting..." : "Updating...")
-							: (isRecovery ? "Reset Password" : "Update Password")}
+						{isLoading ? "Updating..." : "Update Password"}
 					</Button>
 				</CardFooter>
 			</form>

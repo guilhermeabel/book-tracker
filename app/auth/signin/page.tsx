@@ -16,11 +16,11 @@ export default function SignInPage() {
 						Sign up
 					</Link>
 				</p>
-				<p className="text-muted-foreground">
+				{/* <p className="text-muted-foreground">
 					<Link href="/auth/reset-password" className="text-primary hover:underline">
 						Forgot your password?
 					</Link>
-				</p>
+				</p> */}
 			</div>
 		</div>
 	)
