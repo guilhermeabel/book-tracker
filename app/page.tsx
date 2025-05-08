@@ -115,18 +115,22 @@ function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.streak || 0} days</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats && stats.streak > 0 ? "Keep it up!" : "Start your streak today!"}
-                </p>
-              </CardContent>
-            </Card>
+            {stats?.streak && stats.streak > 1 && (
+              <Card className="relative group overflow-hidden">
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 p-[1px] opacity-70"></div>
+                <div className="absolute inset-[1px] bg-card rounded-lg"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-pink-400" />
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 animate-gradient-fast">{stats?.streak} days</div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats && stats.streak > 0 ? "Keep it up!" : "Start your streak today!"}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {stats?.groupRank && (
               <Card>
