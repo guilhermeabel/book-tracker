@@ -27,7 +27,7 @@ export default function Dashboard() {
       {isLoadingGroups ? (
         <HeaderSkeleton />
       ) : (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-start items-start gap-4">
           <AppHeader />
           {groups && groups.length > 0 && (
             <div className="flex gap-2">

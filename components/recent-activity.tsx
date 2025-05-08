@@ -1,6 +1,5 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loading } from "@/components/ui/loading"
 import { useActivity } from "@/lib/hooks/use-activity"
@@ -69,10 +68,17 @@ export default function RecentActivity() {
               className={`flex items-start gap-4 ${activity.isCurrentUser ? "bg-primary/10 p-3 rounded-lg border border-primary/20" : ""
                 }`}
             >
-              <Avatar>
-                <AvatarImage src={activity.user.avatar_url || "/placeholder.svg"} alt={activity.user.name || ""} />
-                <AvatarFallback>{(activity.user.name || "?").charAt(0)}</AvatarFallback>
-              </Avatar>
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                {activity.user.avatar_url ? (
+                  <img
+                    src={activity.user.avatar_url}
+                    alt={activity.user.name || ""}
+                    className="h-10 w-10 rounded-full"
+                  />
+                ) : (
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
               <div className="space-y-1">
                 <p className="text-sm">
                   <span className="font-medium">{activity.user.name}</span>{" "}
