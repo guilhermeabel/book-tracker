@@ -18,6 +18,7 @@ export type ActivityItem = {
   } | null
   subject?: string
   minutes?: number
+  description?: string | null
   isCurrentUser: boolean
 }
 
@@ -84,7 +85,7 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
   
   const { data: studyLogs, error: studyLogsError } = await supabase
     .from('study_logs')
-    .select('id, subject, minutes, created_at, group_id, user_id')
+    .select('id, subject, minutes, description, created_at, group_id, user_id')
     .in('group_id', groupIds)
     .order('created_at', { ascending: false })
     .limit(20)
@@ -151,6 +152,7 @@ const fetchActivity = async (): Promise<ActivityItem[]> => {
       group: log.group_id ? groupMap[log.group_id] : null,
       subject: log.subject,
       minutes: log.minutes,
+      description: log.description,
       isCurrentUser
     }
   })
