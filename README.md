@@ -2,6 +2,10 @@
 
 StudyRats is a web application designed to help you track your study sessions, build consistent habits, and compete with friends in study groups.
 
+## Demo
+
+https://github.com/user-attachments/assets/50e7a2a7-9813-4077-a9ea-fd2541ad0cef
+
 ## Features
 
 - **Log Study Sessions:** Easily record your study time, including the subject and a short description.
@@ -11,6 +15,7 @@ StudyRats is a web application designed to help you track your study sessions, b
 - **User Authentication:** Secure user accounts and profiles.
 
 ## Tech Stack
+
 
 - **Framework:** [Next.js](https://nextjs.org/) (with App Router)
 - **Backend & DB:** [Supabase](https://supabase.io/)
